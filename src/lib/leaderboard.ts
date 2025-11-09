@@ -147,11 +147,11 @@ export function sortLeaderboard(
 }
 
 function compareValues(
-  a: number | Date | string,
-  b: number | Date | string
+  a: number | Date | string | (number | Date)[],
+  b: number | Date | string | (number | Date)[]
 ): number {
-  const valueA = a instanceof Date ? a.getTime() : a;
-  const valueB = b instanceof Date ? b.getTime() : b;
+  const valueA = Array.isArray(a) ? a[0] : a instanceof Date ? a.getTime() : a;
+  const valueB = Array.isArray(b) ? b[0] : b instanceof Date ? b.getTime() : b;
 
   if (valueA < valueB) return -1;
   if (valueA > valueB) return 1;
