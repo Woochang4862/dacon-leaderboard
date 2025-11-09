@@ -5,9 +5,14 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { fetchLeaderboardRows } from "@/lib/leaderboard";
 import type { LeaderboardRow } from "@/types/leaderboard";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
-export default async function Home() {
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function Home({ searchParams }: PageProps) {
+  const params = await searchParams;
   let rows: LeaderboardRow[] = [];
   let errorMessage: string | null = null;
 
@@ -46,7 +51,7 @@ export default async function Home() {
           </span>
         </div>
       ) : (
-        <LeaderboardClient rows={rows} />
+        <LeaderboardClient rows={rows} initialSearchParams={params} />
       )}
     </Fragment>
   );

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { FilterForm, type FilterFormValues } from "@/components/FilterForm";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
@@ -13,6 +14,7 @@ import type { LeaderboardRow, SortOption } from "@/types/leaderboard";
 
 interface LeaderboardClientProps {
   rows: LeaderboardRow[];
+  initialSearchParams?: Record<string, string | string[] | undefined>;
 }
 
 type AppliedFilters = {
@@ -29,8 +31,81 @@ const DEFAULT_FILTERS: AppliedFilters = {
   sortBy: "recent"
 };
 
-export function LeaderboardClient({ rows }: LeaderboardClientProps) {
-  const [filters, setFilters] = useState<AppliedFilters>(DEFAULT_FILTERS);
+function parseSearchParams(
+  params: Record<string, string | string[] | undefined>
+): AppliedFilters {
+  const getString = (key: string): string | undefined => {
+    const value = params[key];
+    if (typeof value === "string") return value;
+    if (Array.isArray(value)) return value[0];
+    return undefined;
+  };
+
+  const minScoreStr = getString("min_score");
+  const minScore =
+    minScoreStr != null && !Number.isNaN(Number(minScoreStr))
+      ? Number(minScoreStr)
+      : null;
+
+  const startDate = getString("start_date") ?? null;
+  const endDate = getString("end_date") ?? null;
+  const sortBy = (getString("sort_by") as SortOption) ?? "recent";
+
+  return {
+    minScore,
+    startDate,
+    endDate,
+    sortBy: SORT_OPTIONS.includes(sortBy) ? sortBy : "recent"
+  };
+}
+
+export function LeaderboardClient({
+  rows,
+  initialSearchParams
+}: LeaderboardClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialFilters = useMemo(() => {
+    if (initialSearchParams) {
+      return parseSearchParams(initialSearchParams);
+    }
+    if (searchParams) {
+      const params: Record<string, string | string[] | undefined> = {};
+      searchParams.forEach((value, key) => {
+        params[key] = value;
+      });
+      return parseSearchParams(params);
+    }
+    return DEFAULT_FILTERS;
+  }, [initialSearchParams, searchParams]);
+
+  const [filters, setFilters] = useState<AppliedFilters>(initialFilters);
+
+  useEffect(() => {
+    setFilters(initialFilters);
+  }, [initialFilters]);
+
+  const updateURL = (newFilters: AppliedFilters) => {
+    const params = new URLSearchParams();
+
+    if (newFilters.minScore != null) {
+      params.set("min_score", String(newFilters.minScore));
+    }
+    if (newFilters.startDate) {
+      params.set("start_date", newFilters.startDate);
+    }
+    if (newFilters.endDate) {
+      params.set("end_date", newFilters.endDate);
+    }
+    if (newFilters.sortBy !== "recent") {
+      params.set("sort_by", newFilters.sortBy);
+    }
+
+    const queryString = params.toString();
+    const newURL = queryString ? `?${queryString}` : "";
+    router.push(newURL, { scroll: false });
+  };
 
   const filteredRows = useMemo(() => {
     const filtered = applyFilters(rows, {
@@ -84,14 +159,16 @@ export function LeaderboardClient({ rows }: LeaderboardClientProps) {
             sortBy: filters.sortBy
           }}
           sortOptions={SORT_OPTIONS}
-          onApply={(values: FilterFormValues) =>
-            setFilters({
+          onApply={(values: FilterFormValues) => {
+            const newFilters = {
               minScore: values.minScore ?? null,
               startDate: values.startDate ?? null,
               endDate: values.endDate ?? null,
               sortBy: values.sortBy
-            })
-          }
+            };
+            setFilters(newFilters);
+            updateURL(newFilters);
+          }}
         />
       </div>
 

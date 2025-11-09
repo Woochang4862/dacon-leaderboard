@@ -30,6 +30,7 @@ export function FilterForm({
   onApply
 }: FilterFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
 
   const initialState = useMemo<FilterState>(
     () => ({
@@ -81,6 +82,46 @@ export function FilterForm({
       endDate: null,
       sortBy: "recent"
     });
+  };
+
+  const handleShare = async () => {
+    const params = new URLSearchParams();
+
+    if (state.minScore.trim().length > 0) {
+      params.set("min_score", state.minScore.trim());
+    }
+    if (state.startDate.trim().length > 0) {
+      params.set("start_date", state.startDate.trim());
+    }
+    if (state.endDate.trim().length > 0) {
+      params.set("end_date", state.endDate.trim());
+    }
+    if (state.sortBy !== "recent") {
+      params.set("sort_by", state.sortBy);
+    }
+
+    const queryString = params.toString();
+    const url = `${window.location.origin}${window.location.pathname}${queryString ? `?${queryString}` : ""}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Dacon Leaderboard",
+          text: "리더보드 필터 설정을 공유합니다",
+          url
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setShareSuccess(true);
+        setTimeout(() => setShareSuccess(false), 2000);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name !== "AbortError") {
+        await navigator.clipboard.writeText(url);
+        setShareSuccess(true);
+        setTimeout(() => setShareSuccess(false), 2000);
+      }
+    }
   };
 
   return (
@@ -175,6 +216,49 @@ export function FilterForm({
             className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-slate-100"
           >
             초기화
+          </button>
+          <button
+            type="button"
+            onClick={handleShare}
+            disabled={isSubmitting}
+            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            title="현재 필터 설정을 URL로 공유"
+          >
+            {shareSuccess ? (
+              <span className="flex items-center gap-1">
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                복사됨
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                  />
+                </svg>
+                공유
+              </span>
+            )}
           </button>
         </div>
       </div>
