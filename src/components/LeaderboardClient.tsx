@@ -14,7 +14,6 @@ import type { LeaderboardRow, SortOption } from "@/types/leaderboard";
 
 interface LeaderboardClientProps {
   rows: LeaderboardRow[];
-  initialSearchParams?: Record<string, string | string[] | undefined>;
 }
 
 type AppliedFilters = {
@@ -59,17 +58,11 @@ function parseSearchParams(
   };
 }
 
-export function LeaderboardClient({
-  rows,
-  initialSearchParams
-}: LeaderboardClientProps) {
+export function LeaderboardClient({ rows }: LeaderboardClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const initialFilters = useMemo(() => {
-    if (initialSearchParams) {
-      return parseSearchParams(initialSearchParams);
-    }
     if (searchParams) {
       const params: Record<string, string | string[] | undefined> = {};
       searchParams.forEach((value, key) => {
@@ -78,7 +71,7 @@ export function LeaderboardClient({
       return parseSearchParams(params);
     }
     return DEFAULT_FILTERS;
-  }, [initialSearchParams, searchParams]);
+  }, [searchParams]);
 
   const [filters, setFilters] = useState<AppliedFilters>(initialFilters);
 

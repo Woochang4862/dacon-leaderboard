@@ -45,11 +45,12 @@ export async function fetchLeaderboardRows({
   const fetchInit: RequestInit & {
     next?: { revalidate: number };
   } = {
-    headers: REQUEST_HEADERS,
-    cache: revalidate === 0 ? "no-store" : "force-cache"
+    headers: REQUEST_HEADERS
   };
 
-  if (revalidate !== 0) {
+  if (revalidate === 0) {
+    fetchInit.cache = "no-store";
+  } else {
     fetchInit.next = { revalidate };
   }
 

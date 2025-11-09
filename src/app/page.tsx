@@ -1,18 +1,11 @@
-import { Fragment } from "react";
+import { Fragment, Suspense } from "react";
 
 import { LeaderboardClient } from "@/components/LeaderboardClient";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { fetchLeaderboardRows } from "@/lib/leaderboard";
 import type { LeaderboardRow } from "@/types/leaderboard";
 
-export const dynamic = "force-dynamic";
-
-interface PageProps {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}
-
-export default async function Home({ searchParams }: PageProps) {
-  const params = await searchParams;
+export default async function Home() {
   let rows: LeaderboardRow[] = [];
   let errorMessage: string | null = null;
 
@@ -51,7 +44,9 @@ export default async function Home({ searchParams }: PageProps) {
           </span>
         </div>
       ) : (
-        <LeaderboardClient rows={rows} initialSearchParams={params} />
+        <Suspense fallback={<div className="text-center py-8 text-slate-600 dark:text-slate-400">로딩 중...</div>}>
+          <LeaderboardClient rows={rows} />
+        </Suspense>
       )}
     </Fragment>
   );
