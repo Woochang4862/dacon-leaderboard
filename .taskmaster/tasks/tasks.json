@@ -1,0 +1,50 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "GitHub Pages 배포 파이프라인 구성",
+        "description": "Next.js 앱을 GitHub Pages(woochang4862.github.io/dacon-leaderboard)로 배포하기 위한 설정",
+        "details": "- Next.js를 static export(+ basePath/assetPrefix)로 구성\n- 빌드 및 배포 스크립트 추가\n- GitHub Actions workflow 작성",
+        "testStrategy": "",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Next.js static export 설정",
+            "description": "GH Pages 서빙을 위해 basePath, assetPrefix, export 설정 적용",
+            "details": "",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 1
+          },
+          {
+            "id": 2,
+            "title": "배포 스크립트 및 환경변수 구성",
+            "description": "package.json 스크립트 및 base path 환경변수 처리",
+            "details": "",
+            "status": "in-progress",
+            "dependencies": [],
+            "parentTaskId": 1
+          },
+          {
+            "id": 3,
+            "title": "GitHub Actions workflow 작성",
+            "description": ".github/workflows/deploy.yml에서 빌드/배포 자동화",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 1
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-11-09T15:14:41.600Z",
+      "description": "Default tasks context",
+      "updated": "2025-11-09T15:24:03.322Z"
+    }
+  }
+}
