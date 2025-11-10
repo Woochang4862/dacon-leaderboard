@@ -5,7 +5,7 @@ const basePath = isGithubActions ? `/${repositoryName}` : "";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
-  trailingSlash: true,
+  trailingSlash: false,
   basePath: basePath || undefined,
   assetPrefix: basePath ? `${basePath}/` : undefined,
   images: {

@@ -5,6 +5,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { fetchLeaderboardRows } from "@/lib/leaderboard";
 import type { LeaderboardRow } from "@/types/leaderboard";
 
+export const dynamic = 'force-static';
+
 export default async function Home() {
   let rows: LeaderboardRow[] = [];
   let errorMessage: string | null = null;
