@@ -35,24 +35,11 @@ const toDate = (value: string) => {
   return parsed;
 };
 
-interface FetchOptions {
-  revalidate?: number;
-}
-
-export async function fetchLeaderboardRows({
-  revalidate = 3600
-}: FetchOptions = {}): Promise<LeaderboardRow[]> {
-  const fetchInit: RequestInit & {
-    next?: { revalidate: number };
-  } = {
-    headers: REQUEST_HEADERS
+export async function fetchLeaderboardRows(): Promise<LeaderboardRow[]> {
+  const fetchInit: RequestInit = {
+    headers: REQUEST_HEADERS,
+    cache: "no-store"
   };
-
-  if (revalidate === 0) {
-    fetchInit.cache = "no-store";
-  } else {
-    fetchInit.next = { revalidate };
-  }
 
   const response = await fetch(LEADERBOARD_URL, fetchInit);
 
