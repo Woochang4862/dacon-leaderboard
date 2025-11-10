@@ -8,13 +8,10 @@ import { LeaderboardTable } from "@/components/LeaderboardTable";
 import {
   SORT_OPTIONS,
   applyFilters,
+  fetchLeaderboardRows,
   sortLeaderboard
 } from "@/lib/leaderboard";
 import type { LeaderboardRow, SortOption } from "@/types/leaderboard";
-
-interface LeaderboardClientProps {
-  rows: LeaderboardRow[];
-}
 
 type AppliedFilters = {
   minScore: number | null;
@@ -58,9 +55,13 @@ function parseSearchParams(
   };
 }
 
-export function LeaderboardClient({ rows }: LeaderboardClientProps) {
+export function LeaderboardClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [rows, setRows] = useState<LeaderboardRow[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const initialFilters = useMemo(() => {
     if (searchParams) {
@@ -78,6 +79,37 @@ export function LeaderboardClient({ rows }: LeaderboardClientProps) {
   useEffect(() => {
     setFilters(initialFilters);
   }, [initialFilters]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadData() {
+      setIsLoading(true);
+      setErrorMessage(null);
+      try {
+        const data = await fetchLeaderboardRows();
+        if (isMounted) {
+          setRows(data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setErrorMessage(
+            error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다."
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const updateURL = (newFilters: AppliedFilters) => {
     const params = new URLSearchParams();
@@ -113,6 +145,26 @@ export function LeaderboardClient({ rows }: LeaderboardClientProps) {
   const filteredSubmissions = filteredRows.length;
   const latestSubmission = getLatestSubmission(filteredRows);
   const bestScore = getBestScore(filteredRows);
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-12 text-slate-600 dark:text-slate-400">
+        <p className="text-lg">리더보드 데이터를 불러오는 중...</p>
+      </div>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="rounded-3xl border border-rose-200 bg-rose-50/80 p-6 text-sm text-rose-700 shadow-lg shadow-rose-900/10 dark:border-rose-500/30 dark:bg-rose-900/30 dark:text-rose-100">
+        리더보드를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+        <br />
+        <span className="mt-1 block text-xs opacity-80">
+          상세 정보: {errorMessage}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <>

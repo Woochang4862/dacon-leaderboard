@@ -43,16 +43,17 @@ export async function fetchLeaderboardRows(): Promise<LeaderboardRow[]> {
 
   const response = await fetch(LEADERBOARD_URL, fetchInit);
 
+  
   if (!response.ok) {
     throw new Error(`리더보드 요청 실패 (status: ${response.status})`);
   }
-
+  
   const payload = (await response.json()) as LeaderboardResponse | LeaderboardRow[];
-
+  
   if (Array.isArray(payload)) {
     return payload;
   }
-
+  
   return payload.data ?? [];
 }
 

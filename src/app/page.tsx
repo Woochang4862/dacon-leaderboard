@@ -1,23 +1,9 @@
-import { Fragment, Suspense } from "react";
+import { Fragment } from "react";
 
 import { LeaderboardClient } from "@/components/LeaderboardClient";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { fetchLeaderboardRows } from "@/lib/leaderboard";
-import type { LeaderboardRow } from "@/types/leaderboard";
 
-export const dynamic = 'force-static';
-
-export default async function Home() {
-  let rows: LeaderboardRow[] = [];
-  let errorMessage: string | null = null;
-
-  try {
-    rows = await fetchLeaderboardRows();
-  } catch (error) {
-    errorMessage =
-      error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
-  }
-
+export default function Home() {
   return (
     <Fragment>
       <header className="mb-10 flex items-start justify-between gap-6">
@@ -37,19 +23,7 @@ export default async function Home() {
         <ThemeToggle />
       </header>
 
-      {errorMessage ? (
-        <div className="rounded-3xl border border-rose-200 bg-rose-50/80 p-6 text-sm text-rose-700 shadow-lg shadow-rose-900/10 dark:border-rose-500/30 dark:bg-rose-900/30 dark:text-rose-100">
-          리더보드를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
-          <br />
-          <span className="mt-1 block text-xs opacity-80">
-            상세 정보: {errorMessage}
-          </span>
-        </div>
-      ) : (
-        <Suspense fallback={<div className="text-center py-8 text-slate-600 dark:text-slate-400">로딩 중...</div>}>
-          <LeaderboardClient rows={rows} />
-        </Suspense>
-      )}
+      <LeaderboardClient />
     </Fragment>
   );
 }
