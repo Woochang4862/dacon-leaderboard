@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, Suspense } from "react";
 
 import { LeaderboardClient } from "@/components/LeaderboardClient";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -23,7 +23,9 @@ export default function Home() {
         <ThemeToggle />
       </header>
 
-      <LeaderboardClient />
+      <Suspense fallback={<div className="text-center py-12 text-slate-600 dark:text-slate-400">리더보드 데이터를 불러오는 중...</div>}>
+        <LeaderboardClient />
+      </Suspense>
     </Fragment>
   );
 }
